@@ -421,4 +421,3 @@ INSERT IGNORE INTO `cloud`.`guest_os_hypervisor` (uuid,hypervisor_type, hypervis
 
 UPDATE  `cloud`.`hypervisor_capabilities` SET  `max_data_volumes_limit` =  '32' WHERE  `hypervisor_capabilities`.`hypervisor_type` =  'KVM';
 
-
