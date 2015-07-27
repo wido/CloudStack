@@ -151,6 +151,9 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
         Gson gson = builder.create();
         String report = gson.toJson(reportMap);
 
+        HttpsURLConnection conn = null;
+        OutputStreamWriter osw = null;
+
         int http_timeout = 15000;
 
         try {
@@ -159,7 +162,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
             URL url = new URL(reportUri + "/" + uniqueID);
 
-            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+            conn = (HttpsURLConnection) url.openConnection();
             conn.setConnectTimeout(http_timeout);
             conn.setReadTimeout(http_timeout);
             conn.setRequestMethod("POST");
@@ -167,10 +170,9 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
 
-            OutputStreamWriter osw = new OutputStreamWriter(conn.getOutputStream());
+            osw = new OutputStreamWriter(conn.getOutputStream());
             osw.write(report);
             osw.flush();
-            osw.close();
 
             int resp_code = conn.getResponseCode();
 
@@ -190,6 +192,18 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
             s_logger.warn("Sending Usage Report failed due to a invalid protocol: " + e.getMessage());
         } catch (IOException e) {
             s_logger.warn("Failed to write Usage Report due to a IOException: " + e.getMessage());
+        } finally {
+            if (osw != null) {
+                try {
+                    osw.close();
+                } catch (IOException e) {
+                    s_logger.debug("Failed to close output stream of HTTPS connection: " + e.getMessage());
+                }
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 
