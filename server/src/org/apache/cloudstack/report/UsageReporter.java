@@ -110,16 +110,15 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
     int usageReportInterval = -1;
 
-    public static UsageReporter getInstance() {
-        return s_instance;
-    }
-
     public static UsageReporter getInstance(Map<String, String> configs) {
-        s_instance.init(configs);
+        if (s_instance == null) {
+            s_instance = new UsageReporter();
+            s_instance.init(configs);
+        }
         return s_instance;
     }
 
-    public UsageReporter() {
+    private UsageReporter() {
         s_instance = this;
     }
 
