@@ -169,9 +169,21 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
 
-            osw = new OutputStreamWriter(conn.getOutputStream());
-            osw.write(report);
-            osw.flush();
+            try {
+                osw = new OutputStreamWriter(conn.getOutputStream(), com.cloud.utils.StringUtils.getPreferredCharset());
+                osw.write(report);
+                osw.flush();
+            } catch (IOException e) {
+                s_logger.warn("Failed to write to OutputStream due to a IOException: " + e.getMessage());
+            } finally {
+                if (osw != null) {
+                    try {
+                        osw.close();
+                    } catch (IOException e) {
+                        s_logger.debug("Failed to close output stream of HTTPS connection: " + e.getMessage());
+                    }
+                }
+            }
 
             int resp_code = conn.getResponseCode();
 
@@ -192,14 +204,6 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
         } catch (IOException e) {
             s_logger.warn("Failed to write Usage Report due to a IOException: " + e.getMessage());
         } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException e) {
-                    s_logger.debug("Failed to close output stream of HTTPS connection: " + e.getMessage());
-                }
-            }
-
             if (conn != null) {
                 conn.disconnect();
             }
