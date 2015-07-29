@@ -215,25 +215,30 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
     private String getUniqueId() {
         String unique = null;
         Connection conn = null;
+        ResultSet rs = null;
 
         try {
             conn = TransactionLegacy.getStandaloneConnection();
 
             PreparedStatement pstmt = conn.prepareStatement("SELECT version,updated FROM version ORDER BY id ASC LIMIT 1");
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             if (rs.next()) {
                 unique = DigestUtils.sha256Hex(rs.getString(1) + rs.getString(2));
             } else {
                 s_logger.debug("No rows found in the version table. Unable to obtain unique ID for this environment");
             }
-
-            rs.close();
         } catch (SQLException e) {
             s_logger.debug("Unable to get the unique ID of this environment: " + e.getMessage());
         } finally {
             try {
-                conn.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
             } catch (SQLException e) {
+                s_logger.debug("Failed to close SQLResource due to: " + e.getMessage());
             }
         }
 
