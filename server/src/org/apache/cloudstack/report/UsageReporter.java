@@ -150,6 +150,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
         Gson gson = builder.create();
         String report = gson.toJson(reportMap);
+        String reportUrl = reportUri + "/" + uniqueID;
 
         HttpsURLConnection conn = null;
         OutputStreamWriter osw = null;
@@ -157,10 +158,10 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
         int http_timeout = 15000;
 
         try {
-            s_logger.info("Usage Report will be send to: " + reportUri);
-            s_logger.debug("REPORT: " + report);
+            s_logger.info("Usage Report will be send to: " + reportUrl);
+            s_logger.debug("Usage Report being send: " + report);
 
-            URL url = new URL(reportUri + "/" + uniqueID);
+            URL url = new URL(reportUrl);
 
             conn = (HttpsURLConnection) url.openConnection();
             conn.setConnectTimeout(http_timeout);
@@ -189,7 +190,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
             int resp_code = conn.getResponseCode();
 
             if (resp_code == HttpsURLConnection.HTTP_OK){
-                s_logger.info("Usage Report succesfully send to: " + reportUri);
+                s_logger.info("Usage Report succesfully send to: " + reportUrl);
             } else {
                 s_logger.warn("Failed to send Usage Report: " + conn.getResponseMessage());
             }
@@ -225,7 +226,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
             if (rs.next()) {
                 unique = DigestUtils.sha256Hex(rs.getString(1) + rs.getString(2));
             } else {
-                s_logger.debug("No rows found in the version table. Unable to obtain unique ID for this environment");
+                s_logger.info("No rows found in the version table. Unable to obtain unique ID for this environment");
             }
         } catch (SQLException e) {
             s_logger.debug("Unable to get the unique ID of this environment: " + e.getMessage());
