@@ -43,6 +43,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import org.apache.cloudstack.framework.config.ConfigKey;
 import org.apache.cloudstack.framework.config.dao.ConfigurationDao;
 import org.apache.cloudstack.managed.context.ManagedContextRunnable;
 
@@ -62,7 +63,6 @@ import com.cloud.vm.dao.UserVmDao;
 import com.cloud.vm.VMInstanceVO;
 import com.cloud.vm.dao.VMInstanceDao;
 import com.cloud.utils.db.SearchCriteria;
-import com.cloud.utils.NumbersUtil;
 import com.cloud.utils.component.ManagerBase;
 import com.cloud.utils.component.ComponentMethodInterceptable;
 import com.cloud.utils.concurrency.NamedThreadFactory;
@@ -89,6 +89,13 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
     private ScheduledExecutorService _executor = null;
 
+    static final ConfigKey<Long> usageReportInterval = new ConfigKey<Long>("Advanced",
+                                                                           Long.class,
+                                                                           "usage.report.interval",
+                                                                           "7",
+                                                                           "Interval (days) between sending anonymous Usage Reports back to the CloudStack project",
+                                                                           false);
+
     @Inject
     private ConfigurationDao _configDao;
     @Inject
@@ -107,8 +114,6 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
     private VersionDao _versionDao;
     @Inject
     private DiskOfferingDao _diskOfferingDao;
-
-    int usageReportInterval = -1;
 
     public synchronized static UsageReporter getInstance(Map<String, String> configs) {
         if (s_instance == null) {
@@ -132,10 +137,8 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
     private void init(Map<String, String> configs) {
         _executor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("UsageReporter"));
 
-        usageReportInterval = NumbersUtil.parseInt(configs.get("usage.report.interval"), 7);
-
-        if (usageReportInterval > 0) {
-            _executor.scheduleWithFixedDelay(new UsageCollector(), 7, usageReportInterval, TimeUnit.DAYS);
+        if (usageReportInterval.value() > 0) {
+            _executor.scheduleWithFixedDelay(new UsageCollector(), 7, usageReportInterval.value(), TimeUnit.DAYS);
         }
 
         uniqueID = getUniqueId();
