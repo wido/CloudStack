@@ -146,13 +146,6 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
     private void sendReport(String reportUri, String uniqueID, Map<String, Object> reportMap) {
 
-        GsonBuilder builder = new GsonBuilder();
-
-        AtomicGsonAdapter adapter = new AtomicGsonAdapter();
-        builder.registerTypeAdapter(AtomicLongMap.class, adapter);
-
-        Gson gson = builder.create();
-        String report = gson.toJson(reportMap);
         String reportUrl = reportUri + "/" + uniqueID;
 
         HttpsURLConnection conn = null;
@@ -161,6 +154,14 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
         int http_timeout = 15000;
 
         try {
+            GsonBuilder builder = new GsonBuilder();
+
+            AtomicGsonAdapter adapter = new AtomicGsonAdapter();
+            builder.registerTypeAdapter(AtomicLongMap.class, adapter);
+
+            Gson gson = builder.create();
+            String report = gson.toJson(reportMap);
+
             s_logger.info("Usage Report will be send to: " + reportUrl);
             s_logger.debug("Usage Report being send: " + report);
 
@@ -207,7 +208,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
         } catch (ProtocolException e) {
             s_logger.warn("Sending Usage Report failed due to a invalid protocol: " + e.getMessage());
         } catch (IOException e) {
-            s_logger.warn("Failed to write Usage Report due to a IOException: " + e.getMessage());
+            s_logger.warn("Failed to write Usage Report due to a IOException: ", e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
@@ -442,9 +443,9 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
 
         long disk_size = 0;
         for (DiskOfferingVO offering : offerings) {
-            provisioning_type.getAndIncrement(offering.getProvisioningType());
-            system_use.getAndIncrement(offering.getSystemUse());
-            use_local_storage.getAndIncrement(offering.getUseLocalStorage());
+            provisioning_type.getAndIncrement(String.valueOf(offering.getProvisioningType()));
+            system_use.getAndIncrement(String.valueOf(offering.getSystemUse()));
+            use_local_storage.getAndIncrement(String.valueOf(offering.getUseLocalStorage()));
             disk_size += offering.getDiskSize();
         }
 
@@ -493,7 +494,7 @@ public class UsageReporter extends ManagerBase implements ComponentMethodInterce
                 sendReport(reportHost, uniqueID, reportMap);
 
             } catch (Exception e) {
-                s_logger.warn("Failed to compile Usage Report: " + e.getMessage());
+                s_logger.error("Failed to compile Usage Report", e);
             }
         }
     }
