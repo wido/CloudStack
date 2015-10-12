@@ -175,7 +175,7 @@ public class NicProfile implements InternalIdentity, Serializable {
     }
 
     @Override
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
