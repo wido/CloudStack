@@ -68,9 +68,10 @@ public class RequestTest extends TestCase {
         SecStorageFirewallCfgCommand cmd2 = new SecStorageFirewallCfgCommand();
         s_logger.info("GetHostStatsCommand should not show up at all in debug level");
         GetHostStatsCommand cmd3 = new GetHostStatsCommand("hostguid", "hostname", 101L);
+        ListTemplateCommand cmd4 = new ListTemplateCommand();
         cmd2.addPortConfig("abc", "24", true, "eth0");
         cmd2.addPortConfig("127.0.0.1", "44", false, "eth1");
-        Request sreq = new Request(2, 3, new Command[] {cmd1, cmd2, cmd3}, true, true);
+        Request sreq = new Request(2, 3, new Command[] {cmd1, cmd2, cmd3, cmd4}, true, true);
         sreq.setSequence(892403717);
 
         Logger logger = Logger.getLogger(GsonHelper.class);
@@ -88,6 +89,7 @@ public class RequestTest extends TestCase {
         log = sreq.log("Trace", true, Level.TRACE);
         assertTrue (log.contains(UpdateHostPasswordCommand.class.getSimpleName()));
         assertTrue (log.contains(SecStorageFirewallCfgCommand.class.getSimpleName()));
+        assertTrue (log.contains(ListTemplateCommand.class.getSimpleName()));
         assertTrue (log.contains(GetHostStatsCommand.class.getSimpleName()));
         assertFalse (log.contains("username"));
         assertFalse (log.contains("password"));
