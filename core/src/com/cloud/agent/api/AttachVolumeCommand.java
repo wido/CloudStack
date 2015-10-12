@@ -22,8 +22,8 @@ package com.cloud.agent.api;
 import com.cloud.storage.Storage.StoragePoolType;
 
 public class AttachVolumeCommand extends Command {
-    private boolean attach;
-    private boolean _managed;
+    private Boolean attach;
+    private Boolean _managed;
     private String vmName;
     private StoragePoolType pooltype;
     private String volumePath;
@@ -33,7 +33,7 @@ public class AttachVolumeCommand extends Command {
     private String chainInfo;
     private String poolUuid;
     private String _storageHost;
-    private int _storagePort;
+    private Integer _storagePort;
     private String _iScsiName;
     private String _chapInitiatorUsername;
     private String _chapInitiatorPassword;
@@ -48,8 +48,8 @@ public class AttachVolumeCommand extends Command {
     protected AttachVolumeCommand() {
     }
 
-    public AttachVolumeCommand(boolean attach, boolean managed, String vmName, StoragePoolType pooltype, String volumePath, String volumeName, Long volumeSize,
-            Long deviceId, String chainInfo) {
+    public AttachVolumeCommand(Boolean attach, Boolean managed, String vmName, StoragePoolType pooltype, String volumePath,
+            String volumeName, Long volumeSize, Long deviceId, String chainInfo) {
         this.attach = attach;
         this._managed = managed;
         this.vmName = vmName;
@@ -62,11 +62,11 @@ public class AttachVolumeCommand extends Command {
     }
 
     @Override
-    public boolean executeInSequence() {
+    public Boolean executeInSequence() {
         return true;
     }
 
-    public boolean getAttach() {
+    public Boolean getAttach() {
         return attach;
     }
 
@@ -122,15 +122,15 @@ public class AttachVolumeCommand extends Command {
         return _storageHost;
     }
 
-    public void setStoragePort(int storagePort) {
+    public void setStoragePort(Integer storagePort) {
         _storagePort = storagePort;
     }
 
-    public int getStoragePort() {
+    public Integer getStoragePort() {
         return _storagePort;
     }
 
-    public boolean isManaged() {
+    public Boolean isManaged() {
         return _managed;
     }
 

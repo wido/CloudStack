@@ -570,7 +570,7 @@ public class HostVO implements Host {
     }
 
     @Override
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

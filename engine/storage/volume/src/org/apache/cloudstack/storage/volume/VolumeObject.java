@@ -249,7 +249,7 @@ public class VolumeObject implements VolumeInfo {
     }
 
     @Override
-    public long getId() {
+    public Long getId() {
         return volumeVO.getId();
     }
 
@@ -333,11 +333,10 @@ public class VolumeObject implements VolumeInfo {
         } finally {
             // in case of OperationFailed, expunge the entry
             if (event == ObjectInDataStoreStateMachine.Event.OperationFailed &&
-                (volumeVO.getState() != Volume.State.Copying && volumeVO.getState() != Volume.State.Uploaded)) {
+                (volumeVO.getState() != Volume.State.Copying && volumeVO.getState() != Volume.State.Uploaded && volumeVO.getState() != Volume.State.UploadError)) {
                 objectInStoreMgr.deleteIfNotReady(this);
             }
         }
-
     }
 
     @Override

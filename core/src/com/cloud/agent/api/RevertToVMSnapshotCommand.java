@@ -29,18 +29,18 @@ public class RevertToVMSnapshotCommand extends VMSnapshotBaseCommand {
         super(vmName, snapshot, volumeTOs, guestOSType);
     }
 
-    public RevertToVMSnapshotCommand(String vmName, VMSnapshotTO snapshot, List<VolumeObjectTO> volumeTOs, String guestOSType, boolean reloadVm) {
+    public RevertToVMSnapshotCommand(String vmName, VMSnapshotTO snapshot, List<VolumeObjectTO> volumeTOs, String guestOSType, Boolean reloadVm) {
         this(vmName, snapshot, volumeTOs, guestOSType);
         setReloadVm(reloadVm);
     }
 
-    private boolean reloadVm = false;
+    private Boolean reloadVm = false;
 
-    public boolean isReloadVm() {
+    public Boolean isReloadVm() {
         return reloadVm;
     }
 
-    public void setReloadVm(boolean reloadVm) {
+    public void setReloadVm(Boolean reloadVm) {
         this.reloadVm = reloadVm;
     }
 }

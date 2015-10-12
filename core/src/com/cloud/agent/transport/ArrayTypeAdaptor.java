@@ -80,7 +80,7 @@ public class ArrayTypeAdaptor<T> implements JsonDeserializer<T[]>, JsonSerialize
             T cmd = (T)_gson.fromJson(entry.getValue(), clazz);
             cmds.add(cmd);
         }
-        Class<?> type = ((Class<?>)typeOfT).getComponentType();
+        Class<?> type = (Class<?>)com.google.gson.internal.$Gson$Types.getArrayComponentType(typeOfT);
         T[] ts = (T[])Array.newInstance(type, cmds.size());
         return cmds.toArray(ts);
     }
