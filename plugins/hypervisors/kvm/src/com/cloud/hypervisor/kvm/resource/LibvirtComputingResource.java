@@ -44,6 +44,9 @@ import java.util.regex.Pattern;
 import javax.ejb.Local;
 import javax.naming.ConfigurationException;
 
+import org.apache.cloudstack.api.guestagent.GuestAgentAnswer;
+import org.apache.cloudstack.api.guestagent.GuestAgentAnswer.GuestAgentIntegerAnswer;
+import org.apache.cloudstack.api.guestagent.GuestAgentCommand;
 import org.apache.cloudstack.storage.to.PrimaryDataStoreTO;
 import org.apache.cloudstack.storage.to.VolumeObjectTO;
 import org.apache.cloudstack.utils.hypervisor.HypervisorUtils;
@@ -145,6 +148,8 @@ import com.cloud.utils.script.Script;
 import com.cloud.utils.ssh.SshHelper;
 import com.cloud.vm.VirtualMachine;
 import com.cloud.vm.VirtualMachine.PowerState;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * LibvirtComputingResource execute requests on the computing/routing host using
@@ -3428,5 +3433,52 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
             device = Script.runSimpleBashScript("rbd showmapped | grep \""+splitPoolImage[0]+"[ ]*"+splitPoolImage[1]+"\" | grep -o \"[^ ]*[ ]*$\"");
         }
         return device;
+    }
+
+
+    public <A extends GuestAgentAnswer> A SendToVMAgent(Connect conn, String vmName, GuestAgentCommand cmd, Class<?> answerClass, Integer timeout) {
+        Domain dm = null;
+        Gson gson = new GsonBuilder().create();
+        try {
+            dm = conn.domainLookupByName(vmName);
+            String result = dm.qemuAgentCommand(gson.toJson(cmd), timeout, 0);
+            return (A) gson.fromJson(result, answerClass);
+        } catch (LibvirtException e) {
+            s_logger.warn("Failed to send Qemu Guest command to Instance " + vmName + " due to: " + e.getMessage());
+        } finally {
+            try {
+                if (dm != null) {
+                    dm.free();
+                }
+            } catch (LibvirtException l) {
+                s_logger.trace("Ignoring libvirt error.", l);
+            }
+        }
+        return null;
+    }
+
+    public boolean checkGuestAgentSync(Connect conn, String vmName) {
+        HashMap arguments = new HashMap();
+        int id = (int)(Math.random() * 1000000) + 1;
+        arguments.put("id", id);
+        GuestAgentCommand cmd = new GuestAgentCommand("guest-sync", arguments);
+        GuestAgentIntegerAnswer answer = null;
+        try {
+            answer = (GuestAgentIntegerAnswer) SendToVMAgent(conn, vmName, cmd, GuestAgentIntegerAnswer.class, 5);
+        } catch (Exception e) {
+            s_logger.warn("Failed to send guest-sync command to guest agent: " + e.getMessage());
+            return false;
+        }
+
+        if (answer == null) {
+            s_logger.warn("Answer from guest agent in " + vmName + " is null");
+            return false;
+        } else if (answer.getAnswer() != id) {
+            s_logger.warn("Answer from guest agent in " + vmName + " is different from input value");
+            return false;
+        } else {
+            s_logger.debug("id = " + id + ", answer from guest agent: " + answer.getAnswer());
+            return true;
+        }
     }
 }
