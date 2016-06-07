@@ -438,6 +438,19 @@ setup_interface_ipv6() {
   ifup $intf
 }
 
+enable_ipv6_link_local() {
+  local dev=$1
+
+  sysctl net.ipv6.conf.$dev.disable_ipv6=0
+  sysctl net.ipv6.conf.$dev.accept_ra=0
+}
+
+get_ipv6_link_local_addr() {
+  local dev=$1
+
+  link_local_addr=$(ip -6 -o addr show dev ${dev} scope link|awk '{print $4}'|cut -d '/' -f 1)
+}
+
 enable_fwding() {
   local enabled=$1
   log_it "cloud: enable_fwding = $1"
@@ -799,11 +812,29 @@ setup_dnsmasq() {
 setup_sshd(){
   local ip=$1
   local eth=$2
-  [ -f /etc/ssh/sshd_config ] && sed -i -e "s/^[#]*ListenAddress.*$/ListenAddress $ip/" /etc/ssh/sshd_config
+
+  # Enable IPv6 on the Hypervisor-Only NIC 'cloud0' so that
+  # we can talk to the SSVM over the IPv6 Link-Local Address
+  # This will be fe80::/
+  enable_ipv6_link_local $eth
+
+  # Get the Link-Local IPv6 address so we can let SSHd listen on it
+  get_ipv6_link_local_addr $eth
+
+  # Properly set up sshd_config file so that is listens on the right
+  # interfaces
+
+  if [ -f /etc/ssh/sshd_config ]; then
+    grep -v ^ListenAddress /etc/ssh/sshd_config > /tmp/sshd.config
+    echo "ListenAddress ${ip}" >> /tmp/sshd.config
+    echo "ListenAddress [${link_local_addr}%${eth}]" >> /tmp/sshd.config
+    cat /tmp/sshd.config > /etc/ssh/sshd_config
+    rm /tmp/sshd.config
+  fi
+
   sed -i "/3922/s/eth./$eth/" /etc/iptables/rules.v4
   sed -i "/3922/s/eth./$eth/" /etc/iptables/rules
 }
-
 
 setup_vpc_apache2() {
   log_it "Setting up apache web server for VPC"
