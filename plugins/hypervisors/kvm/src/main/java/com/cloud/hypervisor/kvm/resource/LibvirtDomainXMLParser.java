@@ -46,6 +46,7 @@ import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.RngDef.RngBackendModel;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.WatchDogDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.WatchDogDef.WatchDogModel;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.WatchDogDef.WatchDogAction;
+import com.cloud.hypervisor.kvm.resource.LibvirtNWFilterDef.FilterRef;
 
 public class LibvirtDomainXMLParser {
     private static final Logger s_logger = Logger.getLogger(LibvirtDomainXMLParser.class);
@@ -186,6 +187,14 @@ public class LibvirtDomainXMLParser {
 
                 if (StringUtils.isNotBlank(slot)) {
                     def.setSlot(Integer.parseInt(slot, 16));
+                }
+
+                NodeList filterrefs = nic.getElementsByTagName("filterref");
+                if (filterrefs.getLength() > 0) {
+                    Element ref = (Element)filterrefs.item(0);
+                    String filter = ref.getAttribute("filter");
+                    FilterRef filterref = new FilterRef(filter);
+                    def.setFilterRef(filterref);
                 }
 
                 interfaces.add(def);

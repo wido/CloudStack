@@ -144,6 +144,8 @@ public class LibvirtDomainXMLParserTest extends TestCase {
                      "<model type='" + ifModel.toString() + "'/>" +
                      "<alias name='net3'/>" +
                      "<address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>" +
+                     "<filterref filter='no-ip-spoofing'>\n" +
+                     "</filterref>\n" +
                      "</interface>" +
                      "<serial type='pty'>" +
                      "<source path='/dev/pts/3'/>" +
@@ -231,6 +233,8 @@ public class LibvirtDomainXMLParserTest extends TestCase {
             assertEquals(Integer.valueOf(i + 3), ifs.get(i).getSlot());
             assertEquals("vnet" + i, ifs.get(i).getDevName());
         }
+        assertNull(ifs.get(0).getFilterRef());
+        assertEquals("no-ip-spoofing", ifs.get(3).getFilterRef().getFilter());
 
         List<RngDef> rngs = parser.getRngs();
         assertEquals("/dev/random", rngs.get(0).getPath());

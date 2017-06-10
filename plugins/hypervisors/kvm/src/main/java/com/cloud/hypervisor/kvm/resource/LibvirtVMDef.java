@@ -26,6 +26,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.Maps;
+import com.cloud.hypervisor.kvm.resource.LibvirtNWFilterDef.FilterRef;
 
 public class LibvirtVMDef {
     private static final Logger s_logger = Logger.getLogger(LibvirtVMDef.class);
@@ -948,6 +949,7 @@ public class LibvirtVMDef {
         private boolean _pxeDisable = false;
         private boolean _linkStateUp = true;
         private Integer _slot;
+        private FilterRef _filterref;
 
         public void defBridgeNet(String brName, String targetBrName, String macAddr, NicModel model) {
             defBridgeNet(brName, targetBrName, macAddr, model, 0);
@@ -1085,6 +1087,13 @@ public class LibvirtVMDef {
 
         public boolean isLinkStateUp() {
             return _linkStateUp;
+
+        public void setFilterRef(FilterRef filterref) {
+            _filterref = filterref;
+        }
+
+        public FilterRef getFilterRef() {
+            return _filterref;
         }
 
         @Override
@@ -1134,6 +1143,10 @@ public class LibvirtVMDef {
 
             if (_slot  != null) {
                 netBuilder.append(String.format("<address type='pci' domain='0x0000' bus='0x00' slot='0x%02x' function='0x0'/>\n", _slot));
+            }
+
+            if (_filterref != null) {
+                netBuilder.append(_filterref.toString());
             }
             netBuilder.append("</interface>\n");
             return netBuilder.toString();

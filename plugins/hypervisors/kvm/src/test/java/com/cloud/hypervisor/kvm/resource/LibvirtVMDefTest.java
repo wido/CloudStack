@@ -26,6 +26,8 @@ import junit.framework.TestCase;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.ChannelDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.DiskDef;
 import com.cloud.hypervisor.kvm.resource.LibvirtVMDef.SCSIDef;
+import com.cloud.hypervisor.kvm.resource.LibvirtNWFilterDef.FilterRef;
+import com.cloud.hypervisor.kvm.resource.LibvirtNWFilterDef.FilterRef.Parameter;
 import com.cloud.utils.Pair;
 
 public class LibvirtVMDefTest extends TestCase {
@@ -43,6 +45,26 @@ public class LibvirtVMDefTest extends TestCase {
                     + "</interface>\n";
 
         assertEquals(expected, ifDef.toString());
+    }
+
+    public void testInterfaceWithFilter() {
+        LibvirtVMDef.InterfaceDef def = new LibvirtVMDef.InterfaceDef();
+        def.defEthernet("vnet0", "00:11:22:aa:bb:cc", LibvirtVMDef.InterfaceDef.NicModel.VIRTIO);
+        FilterRef ref = new FilterRef("no-mac-spoofing");
+        ref.addParameter(new Parameter("MAC", "00:11:22:aa:bb:cc"));
+        def.setFilterRef(ref);
+
+        String expected =
+                "<interface type='ethernet'>\n" +
+                        "<target dev='vnet0'/>\n" +
+                        "<mac address='00:11:22:aa:bb:cc'/>\n" +
+                        "<model type='virtio'/>\n" +
+                        "<filterref filter='no-mac-spoofing'>\n" +
+                        "<parameter name='MAC' value='00:11:22:aa:bb:cc'/>\n" +
+                        "</filterref>\n" +
+                        "</interface>\n";
+
+        assertEquals(expected, def.toString());
     }
 
     public void testInterfaceDirectNet() {
