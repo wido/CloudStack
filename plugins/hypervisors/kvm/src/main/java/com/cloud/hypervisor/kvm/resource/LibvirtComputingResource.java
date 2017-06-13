@@ -3502,6 +3502,23 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
         return true;
     }
 
+    public boolean defineNetworkFilters(final Connect conn, final VirtualMachineTO vm) {
+        final NicTO[] nics = vm.getNics();
+        LibvirtNWFilterDef filter;
+
+        for (final NicTO nic: nics) {
+            filter = new LibvirtNWFilterDef(vm.getName() + "-" + nic.getName(), nic.getUuid());
+            try {
+                conn.networkFilterDefineXML(filter.toString());
+            } catch (LibvirtException e) {
+                s_logger.error("Failed to define libvirt network filter for " + vm.getName() + ": ", e);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     protected boolean post_default_network_rules(final Connect conn, final String vmName, final NicTO nic, final Long vmId, final InetAddress dhcpServerIp, final String hostIp, final String hostMacAddr) {
         if (!_canBridgeFirewall) {
             return false;

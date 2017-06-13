@@ -88,6 +88,9 @@ public final class LibvirtStartCommandWrapper extends CommandWrapper<StartComman
 
             libvirtComputingResource.createVifs(vmSpec, vm);
 
+            s_logger.info("Creating libvirt network filters for "+ vmName);
+            libvirtComputingResource.defineNetworkFilters(conn, vmSpec);
+
             s_logger.debug("starting " + vmName + ": " + vm.toString());
             libvirtComputingResource.startVM(conn, vmName, vm.toString());
 
