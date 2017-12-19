@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.cloud.network.IpAddress;
 import org.apache.cloudstack.engine.orchestration.service.NetworkOrchestrationService;
 import org.apache.log4j.Logger;
 
@@ -107,15 +108,26 @@ public class DirectPodBasedNetworkGuru extends DirectNetworkGuru {
         }
 
         if (nic != null && nic.getRequestedIPv4() != null) {
-            throw new CloudRuntimeException("Does not support custom ip allocation at this time: " + nic);
+            IPAddressVO ip = _ipAddressDao.findByIpAndDcId(dc.getId(), nic.getRequestedIPv4());
+            if (ip != null && ip.getState() != IpAddress.State.Free) {
+                throw new CloudRuntimeException("Requested IPv4 address is not available: " + nic.getRequestedIPv4());
+            }
         }
 
         if (nic == null) {
             nic = new NicProfile(rsStrategy, null, null, null, null);
         } else if (nic.getIPv4Address() == null) {
             nic.setReservationStrategy(ReservationStrategy.Start);
+            if (nic.getRequestedIPv4() != null) {
+                s_logger.info("Assigning IPv4 address " + nic.getRequestedIPv4() + " as this was requested for deployment");
+                _ipAddrMgr.allocateDirectIp(nic, dc, vm, network, nic.getRequestedIPv4(), nic.getRequestedIPv6());
+                nic.setIPv4Address(nic.getRequestedIPv4());
+            }
         } else {
             nic.setReservationStrategy(ReservationStrategy.Create);
+            s_logger.info("Assigning IPv4 address " + nic.getRequestedIPv4() + " as this was requested for deployment");
+            _ipAddrMgr.allocateDirectIp(nic, dc, vm, network, nic.getRequestedIPv4(), nic.getRequestedIPv6());
+            nic.setIPv4Address(nic.getRequestedIPv4());
         }
 
         if (rsStrategy == ReservationStrategy.Create) {
