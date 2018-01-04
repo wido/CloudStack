@@ -128,6 +128,8 @@ import com.cloud.dc.dao.ClusterDao;
 import com.cloud.dc.dao.DataCenterDao;
 import com.cloud.dc.dao.DedicatedResourceDao;
 import com.cloud.dc.dao.HostPodDao;
+import com.cloud.dc.dao.VlanDao;
+import com.cloud.dc.Vlan;
 import com.cloud.deploy.DataCenterDeployment;
 import com.cloud.deploy.DeployDestination;
 import com.cloud.deploy.DeploymentPlanner;
@@ -323,6 +325,8 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
     protected VolumeDao _volsDao = null;
     @Inject
     protected DataCenterDao _dcDao = null;
+    @Inject
+    protected VlanDao _vlanDao = null;
     @Inject
     protected FirewallRulesDao _rulesDao = null;
     @Inject
@@ -1531,6 +1535,9 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                             _ipAddressDao.unassignIpAddress(ip.getId());
                         }
                     });
+                    final Vlan vlan = _vlanDao.findById(ip.getVlanId());
+                    nicVO.setIPv4Gateway(vlan.getVlanGateway());
+                    nicVO.setIPv4Netmask(vlan.getVlanNetmask());
                 }
             } catch (InsufficientAddressCapacityException e) {
                 s_logger.error("Allocating ip to guest nic " + nicVO.getUuid() + " failed, for insufficient address capacity");
@@ -1541,7 +1548,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
             return null;
         }
 
-        // update nic ipaddress
+        s_logger.debug("Updating IPv4 address of NIC " + nicVO + " to " + ipaddr + "/" + nicVO.getIPv4Netmask() + " with gateway " + nicVO.getIPv4Gateway());
         nicVO.setIPv4Address(ipaddr);
         _nicDao.persist(nicVO);
 
