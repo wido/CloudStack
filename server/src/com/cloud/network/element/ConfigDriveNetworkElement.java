@@ -423,7 +423,7 @@ public class ConfigDriveNetworkElement extends AdapterBase implements NetworkEle
             boolean isWindows = _guestOSCategoryDao.findById(_guestOSDao.findById(vm.getGuestOSId()).getCategoryId()).getName().equalsIgnoreCase("Windows");
 
             final List<String[]> vmData = _networkModel.generateVmData(vm.getUserData(), serviceOffering, vm.getDataCenterId(), vm.getInstanceName(), vm.getHostName(), vm.getId(),
-                    vm.getUuid(), nic.getIPv4Address(), sshPublicKey, (String) profile.getParameter(VirtualMachineProfile.Param.VmPassword), isWindows);
+                    vm.getUuid(), nic.getIPv4Address(), nic.getIPv6Address(), sshPublicKey, (String) profile.getParameter(VirtualMachineProfile.Param.VmPassword), isWindows);
             profile.setVmData(vmData);
             profile.setConfigDriveLabel(VirtualMachineManager.VmConfigDriveLabel.value());
         }

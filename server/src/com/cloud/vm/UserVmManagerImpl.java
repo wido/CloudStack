@@ -4114,7 +4114,7 @@ public class UserVmManagerImpl extends ManagerBase implements UserVmManager, Vir
                 boolean isWindows = _guestOSCategoryDao.findById(_guestOSDao.findById(vm.getGuestOSId()).getCategoryId()).getName().equalsIgnoreCase("Windows");
 
                 List<String[]> vmData = _networkModel.generateVmData(vm.getUserData(), serviceOffering, vm.getDataCenterId(), vm.getInstanceName(), vm.getHostName(), vm.getId(),
-                        vm.getUuid(), defaultNic.getIPv4Address(), vm.getDetail("SSH.PublicKey"), (String) profile.getParameter(VirtualMachineProfile.Param.VmPassword), isWindows);
+                        vm.getUuid(), defaultNic.getIPv4Address(), defaultNic.getIPv6Address(), vm.getDetail("SSH.PublicKey"), (String) profile.getParameter(VirtualMachineProfile.Param.VmPassword), isWindows);
                 String vmName = vm.getInstanceName();
                 String configDriveIsoRootFolder = "/tmp";
                 String isoFile = configDriveIsoRootFolder + "/" + vmName + "/configDrive/" + vmName + ".iso";

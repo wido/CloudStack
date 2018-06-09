@@ -23,15 +23,17 @@ import java.util.List;
 
 public class VmData extends ConfigBase {
     private String vmIpAddress;
+    private String vmIp6Address;
     private List<String[]> vmMetadata;
 
     public VmData() {
         super(ConfigBase.VM_METADATA);
     }
 
-    public VmData(String vmIpAddress, List<String[]> vmMetadata) {
+    public VmData(String vmIpAddress, String vmIp6Address, List<String[]> vmMetadata) {
         super(ConfigBase.VM_METADATA);
         this.vmIpAddress = vmIpAddress;
+        this.vmIp6Address = vmIp6Address;
         this.vmMetadata = vmMetadata;
     }
 

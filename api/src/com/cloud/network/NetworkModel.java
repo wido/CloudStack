@@ -60,8 +60,10 @@ public interface NetworkModel {
     String AVAILABILITY_ZONE_FILE = "availability-zone";
     String LOCAL_HOSTNAME_FILE = "local-hostname";
     String LOCAL_IPV4_FILE = "local-ipv4";
+    String LOCAL_IPV6_FILE = "local-ipv6";
     String PUBLIC_HOSTNAME_FILE = "public-hostname";
     String PUBLIC_IPV4_FILE = "public-ipv4";
+    String PUBLIC_IPV6_FILE = "public-ipv6";
     String INSTANCE_ID_FILE = "instance-id";
     String VM_ID_FILE = "vm-id";
     String PUBLIC_KEYS_FILE = "public-keys";
@@ -313,7 +315,7 @@ public interface NetworkModel {
     boolean getNetworkEgressDefaultPolicy(Long networkId);
 
     List<String[]> generateVmData(String userData, String serviceOffering, long datacenterId,
-                                  String vmName, String vmHostName, long vmId, String vmUuid, String guestIpAddress, String publicKey, String password, Boolean isWindows);
+                                  String vmName, String vmHostName, long vmId, String vmUuid, String guestIpAddress, String guestIp6Address, String publicKey, String password, Boolean isWindows);
 
     String getValidNetworkCidr(Network guestNetwork);
 

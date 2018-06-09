@@ -34,7 +34,7 @@ public class VmDataConfigItem extends AbstractConfigItemFacade {
     public List<ConfigItem> generateConfig(final NetworkElementCommand cmd) {
         final VmDataCommand command = (VmDataCommand) cmd;
 
-        final VmData vmData = new VmData(command.getVmIpAddress(), command.getVmData());
+        final VmData vmData = new VmData(command.getVmIpAddress(), command.getVmIp6Address(), command.getVmData());
 
         return generateConfigItems(vmData);
     }

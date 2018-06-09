@@ -173,6 +173,8 @@ public class NetUtilsTest {
     public void testGetIp6CidrSize() {
         assertEquals(NetUtils.getIp6CidrSize("1234:5678::1/32"), 32);
         assertEquals(NetUtils.getIp6CidrSize("1234:5678::1"), 0);
+        assertEquals(NetUtils.getIp6CidrSize("2001:db8::/64"), 64);
+        assertEquals(NetUtils.getIp6CidrSize("2001:db8:200::/80"), 80);
     }
 
     @Test

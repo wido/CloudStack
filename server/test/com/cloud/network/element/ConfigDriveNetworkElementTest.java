@@ -270,6 +270,7 @@ public class ConfigDriveNetworkElementTest {
         when(virtualMachine.getUuid()).thenReturn("vm-uuid");
         when(userVmDetailVO.getValue()).thenReturn(PUBLIC_KEY);
         when(nicp.getIPv4Address()).thenReturn("192.168.111.111");
+        when(nicp.getIPv6Address()).thenReturn("2001:db8:100::200");
         when(_userVmDetailsDao.findDetail(anyLong(), anyString())).thenReturn(userVmDetailVO);
         when(_ipAddressDao.findByAssociatedVmId(VMID)).thenReturn(publicIp);
         when(publicIp.getAddress()).thenReturn(new Ip("7.7.7.7"));

@@ -186,7 +186,7 @@ public class CommandSetupHelper {
         final String zoneName = _dcDao.findById(router.getDataCenterId()).getName();
         cmds.addCommand(
                 "vmdata",
-                generateVmDataCommand(router, nic.getIPv4Address(), vm.getUserData(), serviceOffering, zoneName, nic.getIPv4Address(), vm.getHostName(), vm.getInstanceName(),
+                generateVmDataCommand(router, nic.getIPv4Address(), nic.getIPv6Address(), vm.getUserData(), serviceOffering, zoneName, nic.getIPv4Address(), nic.getIPv6Address(), vm.getHostName(), vm.getInstanceName(),
                         vm.getId(), vm.getUuid(), publicKey, nic.getNetworkId()));
     }
 
@@ -1004,10 +1004,10 @@ public class CommandSetupHelper {
         return setupCmd;
     }
 
-    private VmDataCommand generateVmDataCommand(final VirtualRouter router, final String vmPrivateIpAddress, final String userData, final String serviceOffering,
-            final String zoneName, final String guestIpAddress, final String vmName, final String vmInstanceName, final long vmId, final String vmUuid, final String publicKey,
+    private VmDataCommand generateVmDataCommand(final VirtualRouter router, final String vmPrivateIpAddress, final String vmPrivateIp6Address, final String userData, final String serviceOffering,
+            final String zoneName, final String guestIpAddress, final String guestIp6Address, final String vmName, final String vmInstanceName, final long vmId, final String vmUuid, final String publicKey,
             final long guestNetworkId) {
-        final VmDataCommand cmd = new VmDataCommand(vmPrivateIpAddress, vmName, _networkModel.getExecuteInSeqNtwkElmtCmd());
+        final VmDataCommand cmd = new VmDataCommand(vmPrivateIpAddress, vmPrivateIp6Address, vmName, _networkModel.getExecuteInSeqNtwkElmtCmd());
 
         cmd.setAccessDetail(NetworkElementCommand.ROUTER_IP, _routerControlHelper.getRouterControlIp(router.getId()));
         cmd.setAccessDetail(NetworkElementCommand.ROUTER_GUEST_IP, _routerControlHelper.getRouterIpInNetwork(guestNetworkId, router.getId()));
@@ -1040,6 +1040,10 @@ public class CommandSetupHelper {
             cmd.addVmData("metadata", "vm-id", vmUuid);
         }
         cmd.addVmData("metadata", "public-keys", publicKey);
+        if (guestIp6Address != null) {
+            cmd.addVmData("metadata", "public-ipv6", guestIp6Address);
+            cmd.addVmData("metadata", "local-ipv6", guestIp6Address);
+        }
 
         String cloudIdentifier = _configDao.getValue("cloud.identifier");
         if (cloudIdentifier == null) {

@@ -16,10 +16,7 @@
 // under the License.
 package com.cloud.network;
 
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1145,24 +1142,9 @@ public class NetworkServiceImpl extends ManagerBase implements  NetworkService {
         if (startIP != null) {
             ipv4 = true;
         }
-        if (startIPv6 != null) {
-            ipv6 = true;
-        }
 
-        if (gateway != null) {
-            try {
-                // getByName on a literal representation will only check validity of the address
-                // http://docs.oracle.com/javase/6/docs/api/java/net/InetAddress.html#getByName(java.lang.String)
-                InetAddress gatewayAddress = InetAddress.getByName(gateway);
-                if (gatewayAddress instanceof Inet6Address) {
-                    ipv6 = true;
-                } else {
-                    ipv4 = true;
-                }
-            } catch (UnknownHostException e) {
-                s_logger.error("Unable to convert gateway IP to a InetAddress", e);
-                throw new InvalidParameterValueException("Gateway parameter is invalid");
-            }
+        if (StringUtils.isNotBlank(ip6Gateway) || StringUtils.isNotBlank(ip6Cidr)) {
+            ipv6 = true;
         }
 
         String cidr = null;
@@ -1206,14 +1188,11 @@ public class NetworkServiceImpl extends ManagerBase implements  NetworkService {
         }
 
         if (ipv6) {
-            if (endIPv6 == null) {
-                endIPv6 = startIPv6;
-            }
-            _networkModel.checkIp6Parameters(startIPv6, endIPv6, ip6Gateway, ip6Cidr);
-
             if (zone.getNetworkType() != NetworkType.Advanced || ntwkOff.getGuestType() != Network.GuestType.Shared) {
-                throw new InvalidParameterValueException("Can only support create IPv6 network with advance shared network!");
+                throw new InvalidParameterValueException("IPv6 is only supported in Advanced Zones with shared network");
             }
+
+            _networkModel.checkIp6Parameters(startIPv6, endIPv6, ip6Gateway, ip6Cidr);
         }
 
         if (isolatedPvlan != null && (zone.getNetworkType() != NetworkType.Advanced || ntwkOff.getGuestType() != Network.GuestType.Shared)) {

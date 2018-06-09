@@ -174,6 +174,7 @@ import com.cloud.vm.dao.NicIpAliasDao;
 import com.cloud.vm.dao.NicSecondaryIpDao;
 import com.cloud.vm.dao.UserVmDao;
 import com.cloud.vm.dao.VMInstanceDao;
+import com.googlecode.ipv6.IPv6Address;
 
 public class IpAddressManagerImpl extends ManagerBase implements IpAddressManager, Configurable {
     private static final Logger s_logger = Logger.getLogger(IpAddressManagerImpl.class);
@@ -2011,6 +2012,7 @@ public class IpAddressManagerImpl extends ManagerBase implements IpAddressManage
             public void doInTransactionWithoutResult(TransactionStatus status) throws InsufficientAddressCapacityException {
                 //This method allocates direct ip for the Shared network in Advance zones
                 boolean ipv4 = false;
+                boolean ipv6 = false;
 
                 if (network.getGateway() != null) {
                     if (nic.getIPv4Address() == null) {
@@ -2050,29 +2052,45 @@ public class IpAddressManagerImpl extends ManagerBase implements IpAddressManage
                     nic.setIPv4Dns2(dc.getDns2());
                 }
 
-                //FIXME - get ipv6 address from the placeholder if it's stored there
-                if (network.getIp6Gateway() != null) {
+
+                /**
+                 * Calculate the IPv6 Address the Instance will obtain using SLAAC and IPv6 EUI-64
+                 *
+                 * Linux, FreeBSD and Windows all calculate the same IPv6 address when configured properly.
+                 *
+                 * Using Router Advertisements the routers in the network should announce the IPv6 CIDR which is configured
+                 * in in the vlan table in the database.
+                 *
+                 * This way the NIC will be populated with a IPv6 address on which the Instance is reachable.
+                 */
+                if (network.getGuestType() == GuestType.Shared && network.getIp6Gateway() != null && network.getIp6Cidr() != null) {
                     if (nic.getIPv6Address() == null) {
-                        UserIpv6Address ip = _ipv6Mgr.assignDirectIp6Address(dc.getId(), vm.getOwner(), network.getId(), requestedIpv6);
-                        Vlan vlan = _vlanDao.findById(ip.getVlanId());
-                        nic.setIPv6Address(ip.getAddress().toString());
-                        nic.setIPv6Gateway(vlan.getIp6Gateway());
-                        nic.setIPv6Cidr(vlan.getIp6Cidr());
-                        if (ipv4) {
-                            nic.setFormat(AddressFormat.DualStack);
-                        } else {
-                            nic.setIsolationUri(IsolationType.Vlan.toUri(vlan.getVlanTag()));
-                            nic.setBroadcastType(BroadcastDomainType.Vlan);
-                            nic.setBroadcastUri(BroadcastDomainType.Vlan.toUri(vlan.getVlanTag()));
-                            nic.setFormat(AddressFormat.Ip6);
-                            nic.setReservationId(String.valueOf(vlan.getVlanTag()));
-                            if(nic.getMacAddress() == null) {
-                                nic.setMacAddress(ip.getMacAddress());
-                            }
-                        }
+                        ipv6 = true;
+                        s_logger.debug("Found IPv6 CIDR " + network.getIp6Cidr() + " for network " + network);
+                        nic.setIPv6Cidr(network.getIp6Cidr());
+                        nic.setIPv6Gateway(network.getIp6Gateway());
+
+                        IPv6Address ipv6addr = NetUtils.EUI64Address(network.getIp6Cidr(), nic.getMacAddress());
+                        s_logger.info("Calculated IPv6 address " + ipv6addr + " using EUI-64 for NIC");
+                        nic.setIPv6Address(ipv6addr.toString());
+
+                        nic.setIPv6Dns1(dc.getIp6Dns1());
+                        nic.setIPv6Dns2(dc.getIp6Dns2());
                     }
-                    nic.setIPv6Dns1(dc.getIp6Dns1());
-                    nic.setIPv6Dns2(dc.getIp6Dns2());
+                } else {
+                    s_logger.debug("IPv6 not configured for network " + network);
+                }
+
+                if (ipv4 && !ipv6) {
+                    nic.setFormat(AddressFormat.Ip4);
+                }
+
+                if (!ipv4 && ipv6) {
+                    nic.setFormat(AddressFormat.Ip6);
+                }
+
+                if (ipv4 && ipv6) {
+                    nic.setFormat(AddressFormat.DualStack);
                 }
             }
         });

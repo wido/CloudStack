@@ -2106,11 +2106,18 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
             throw ex;
         }
 
-        boolean ipv6 = false;
-
+        // Validate IPv6 details
         if (StringUtils.isNotBlank(ip6Gateway) && StringUtils.isNotBlank(ip6Cidr)) {
-            ipv6 = true;
+            if (!NetUtils.isValidIp6Cidr(ip6Cidr)) {
+                throw new InvalidParameterValueException("Invalid IPv6 CIDR specified");
+            }
+
+            if (NetUtils.getIp6CidrSize(ip6Cidr) != 64) {
+                throw new InvalidParameterValueException("IPv6 CIDR size should be 64 bits");
+            }
+
         }
+
         // Validate zone
         final DataCenterVO zone = _dcDao.findById(zoneId);
         if (zone.getNetworkType() == NetworkType.Basic) {
@@ -2151,9 +2158,6 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
 
         } else if (zone.getNetworkType() == NetworkType.Advanced) {
             if (zone.isSecurityGroupEnabled()) {
-                if (ipv6) {
-                    throw new InvalidParameterValueException("IPv6 is not supported with security group!");
-                }
                 if (isolatedPvlan != null) {
                     throw new InvalidParameterValueException("Isolated Private VLAN is not supported with security group!");
                 }
@@ -2174,10 +2178,6 @@ public class NetworkOrchestrator extends ManagerBase implements NetworkOrchestra
             if (ntwkOff.getElasticIp() || ntwkOff.getElasticLb()) {
                 throw new InvalidParameterValueException("Elastic IP and Elastic LB services are supported in zone of type " + NetworkType.Basic);
             }
-        }
-
-        if (ipv6 && !NetUtils.isValidIp6Cidr(ip6Cidr)) {
-            throw new InvalidParameterValueException("Invalid IPv6 cidr specified");
         }
 
         //TODO(VXLAN): Support VNI specified

@@ -591,9 +591,6 @@ public class NetworkModelImpl extends ManagerBase implements NetworkModel, Confi
             if (!hasFreeIps) {
                 return false;
             }
-            if (network.getIp6Gateway() != null) {
-                hasFreeIps = isIP6AddressAvailableInNetwork(network.getId());
-            }
         } else {
             if (network.getCidr() == null) {
                 s_logger.debug("Network - " + network.getId() +  " has NULL CIDR.");
@@ -2176,10 +2173,14 @@ public class NetworkModelImpl extends ManagerBase implements NetworkModel, Confi
             throw new InvalidParameterValueException("ip6Gateway is not in ip6cidr indicated network!");
         }
 
-        int cidrSize = NetUtils.getIp6CidrSize(ip6Cidr);
-        // we only support cidr == 64
-        if (cidrSize != 64) {
-            throw new InvalidParameterValueException("The cidr size of IPv6 network must be 64 bits!");
+        /*
+            A CIDR of 64-bit (/64) is required to make sure that StateLess Address Auto Configuration (SLAAC)
+            can work with IPv6.
+
+            Anything larger or smaller than 64-bits can cause problems with IPv6 and is thus not supported
+         */
+        if (NetUtils.getIp6CidrSize(ip6Cidr) != 64) {
+            throw new InvalidParameterValueException("IPv6 CIDR should be exactly 64-bits");
         }
     }
 
@@ -2347,7 +2348,7 @@ public class NetworkModelImpl extends ManagerBase implements NetworkModel, Confi
     @Override
     public List<String[]> generateVmData(String userData, String serviceOffering, long datacenterId,
                                          String vmName, String vmHostName, long vmId, String vmUuid,
-                                         String guestIpAddress, String publicKey, String password, Boolean isWindows) {
+                                         String guestIpAddress, String guestIp6Address, String publicKey, String password, Boolean isWindows) {
 
         DataCenterVO dcVo = _dcDao.findById(datacenterId);
         final String zoneName = dcVo.getName();
@@ -2364,6 +2365,10 @@ public class NetworkModelImpl extends ManagerBase implements NetworkModel, Confi
         vmData.add(new String[]{METATDATA_DIR, LOCAL_HOSTNAME_FILE, StringUtils.unicodeEscape(vmHostName)});
         vmData.add(new String[]{METATDATA_DIR, LOCAL_IPV4_FILE, guestIpAddress});
 
+        if (guestIp6Address != null) {
+            vmData.add(new String[]{METATDATA_DIR, LOCAL_IPV6_FILE, guestIp6Address});
+        }
+
         String publicIpAddress = guestIpAddress;
         String publicHostName = StringUtils.unicodeEscape(vmHostName);
 
@@ -2376,6 +2381,9 @@ public class NetworkModelImpl extends ManagerBase implements NetworkModel, Confi
             }
         }
         vmData.add(new String[]{METATDATA_DIR, PUBLIC_IPV4_FILE, publicIpAddress});
+        if (guestIp6Address != null) {
+            vmData.add(new String[]{METATDATA_DIR, PUBLIC_IPV6_FILE, guestIp6Address});
+        }
         vmData.add(new String[]{METATDATA_DIR, PUBLIC_HOSTNAME_FILE, publicHostName});
 
         if (vmUuid == null) {
