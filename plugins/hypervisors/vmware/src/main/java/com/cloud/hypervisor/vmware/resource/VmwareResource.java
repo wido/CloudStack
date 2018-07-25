@@ -5287,7 +5287,6 @@ public class VmwareResource implements StoragePoolResource, ServerResource, Vmwa
         }
 
         cmd.setCaps("hvm");
-        cmd.setDom0MinMemory(0);
         cmd.setSpeed(summary.getCpuSpeed());
         cmd.setCpuSockets(summary.getCpuSockets());
         cmd.setCpus((int)summary.getCpuCount());

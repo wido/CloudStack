@@ -206,7 +206,6 @@ public class Ovm3HypervisorSupport {
                     .longValue());
             BigInteger freemem = BigInteger.valueOf(host.getFreeMemory()
                     .longValue());
-            cmd.setDom0MinMemory(totalmem.subtract(freemem).longValue());
             // setPoolSync and setCaps.
             cmd.setGuid(config.getCsHostGuid());
             cmd.setDataCenter(config.getAgentZoneId().toString());

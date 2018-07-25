@@ -33,7 +33,6 @@ public class StartupRoutingCommand extends StartupCommand {
     int cpus;
     long speed;
     long memory;
-    long dom0MinMemory;
     boolean poolSync;
     private boolean supportsClonedVolumes;
 
@@ -52,28 +51,27 @@ public class StartupRoutingCommand extends StartupCommand {
 
     }
 
-    public StartupRoutingCommand(int cpus, long speed, long memory, long dom0MinMemory, final String caps, final HypervisorType hypervisorType,
+    public StartupRoutingCommand(int cpus, long speed, long memory, final String caps, final HypervisorType hypervisorType,
             final Map<String, String> hostDetails) {
         super(Host.Type.Routing);
         this.cpus = cpus;
         this.speed = speed;
         this.memory = memory;
-        this.dom0MinMemory = dom0MinMemory;
         this.hypervisorType = hypervisorType;
         this.hostDetails = hostDetails;
         this.caps = caps;
         this.poolSync = false;
     }
 
-    public StartupRoutingCommand(int cpus, long speed, long memory, long dom0MinMemory, String caps, HypervisorType hypervisorType,
+    public StartupRoutingCommand(int cpus, long speed, long memory, String caps, HypervisorType hypervisorType,
             RouterPrivateIpStrategy privIpStrategy) {
-        this(cpus, speed, memory, dom0MinMemory, caps, hypervisorType);
+        this(cpus, speed, memory, caps, hypervisorType);
         getHostDetails().put(RouterPrivateIpStrategy.class.getCanonicalName(), privIpStrategy.toString());
     }
 
 
-    public StartupRoutingCommand(int cpus2, long speed2, long memory2, long dom0MinMemory2, String caps2, HypervisorType hypervisorType2) {
-        this(cpus2, speed2, memory2, dom0MinMemory2, caps2, hypervisorType2, new HashMap<String, String>());
+    public StartupRoutingCommand(int cpus2, long speed2, long memory2, String caps2, HypervisorType hypervisorType2) {
+        this(cpus2, speed2, memory2, caps2, hypervisorType2, new HashMap<String, String>());
     }
 
 
@@ -97,10 +95,6 @@ public class StartupRoutingCommand extends StartupCommand {
         return memory;
     }
 
-    public long getDom0MinMemory() {
-        return dom0MinMemory;
-    }
-
     public void setSpeed(long speed) {
         this.speed = speed;
     }
@@ -115,10 +109,6 @@ public class StartupRoutingCommand extends StartupCommand {
 
     public void setMemory(long memory) {
         this.memory = memory;
-    }
-
-    public void setDom0MinMemory(long dom0MinMemory) {
-        this.dom0MinMemory = dom0MinMemory;
     }
 
     public void setCaps(String caps) {

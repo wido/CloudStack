@@ -35,3 +35,6 @@ INSERT INTO `cloud`.`role_permissions` (`uuid`, `role_id`, `rule`, `permission`,
 INSERT INTO `cloud`.`role_permissions` (`uuid`, `role_id`, `rule`, `permission`, `sort_order`) values (UUID(), 4, 'moveNetworkAclItem', 'ALLOW', 260) ON DUPLICATE KEY UPDATE rule=rule;
 
 UPDATE `cloud`.`async_job` SET `removed` = now() WHERE `removed` IS NULL;
+
+-- We are not using the dom0_memory in any of our calculations.
+ALTER TABLE `cloud`.`host` DROP COLUMN `dom0_memory`;

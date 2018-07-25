@@ -93,14 +93,12 @@ public class DummyResource implements ServerResource {
         long speed = getConfiguredProperty("cpuspeed", 4000L);
         long cpus = getConfiguredProperty("cpus", 4L);
         long ram = getConfiguredProperty("memory", 16000L * 1024L * 1024L);
-        long dom0ram = Math.min(ram / 10, 768 * 1024 * 1024L);
 
         String cap = getConfiguredProperty("capabilities", "hvm");
         info.add((int)cpus);
         info.add(speed);
         info.add(ram);
         info.add(cap);
-        info.add(dom0ram);
         return info;
 
     }
@@ -147,7 +145,7 @@ public class DummyResource implements ServerResource {
         final List<Object> info = getHostInfo();
 
         final StartupRoutingCommand cmd =
-            new StartupRoutingCommand((Integer)info.get(0), (Long)info.get(1), (Long)info.get(2), (Long)info.get(4), (String)info.get(3), HypervisorType.KVM,
+            new StartupRoutingCommand((Integer)info.get(0), (Long)info.get(1), (Long)info.get(2), (String)info.get(3), HypervisorType.KVM,
                 RouterPrivateIpStrategy.HostLocal);
         fillNetworkInformation(cmd);
         cmd.getHostDetails().putAll(getVersionStrings());

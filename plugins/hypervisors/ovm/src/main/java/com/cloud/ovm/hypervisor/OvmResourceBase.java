@@ -291,7 +291,6 @@ public class OvmResourceBase implements ServerResource, HypervisorResource {
             cmd.setSpeed(hostDetails.cpuSpeed);
             cmd.setCpus(hostDetails.cpuNum);
             cmd.setMemory(hostDetails.freeMemory);
-            cmd.setDom0MinMemory(hostDetails.dom0Memory);
             cmd.setGuid(_guid);
             cmd.setDataCenter(_zoneId.toString());
             cmd.setPod(_podId.toString());

@@ -298,9 +298,9 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
 
     private String _updateHostPasswdPath;
 
-    private long _dom0MinMem;
+    private long _hostReservedMemory;
 
-    private long _dom0OvercommitMem;
+    private long _hostOverCommitMemory;
 
     protected int _cmdsTimeout;
     protected int _stopTimeout;
@@ -382,7 +382,7 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
     }
 
     public MemStat getMemStat() {
-        return new MemStat(_dom0MinMem, _dom0OvercommitMem);
+        return new MemStat(_hostReservedMemory, _hostOverCommitMemory);
     }
 
     public VirtualRoutingResource getVirtRouterResource() {
@@ -847,12 +847,12 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
 
         value = (String)params.get("host.reserved.mem.mb");
         // Reserve 1GB unless admin overrides
-        _dom0MinMem = NumbersUtil.parseInt(value, 1024) * 1024* 1024L;
+        _hostReservedMemory = NumbersUtil.parseInt(value, 1024) * 1024* 1024L;
 
         value = (String)params.get("host.overcommit.mem.mb");
         // Support overcommit memory for host if host uses ZSWAP, KSM and other memory
         // compressing technologies
-        _dom0OvercommitMem = NumbersUtil.parseInt(value, 0) * 1024 * 1024L;
+        _hostOverCommitMemory = NumbersUtil.parseInt(value, 0) * 1024 * 1024L;
 
         value = (String) params.get("kvmclock.disable");
         if (Boolean.parseBoolean(value)) {
@@ -2601,7 +2601,7 @@ public class LibvirtComputingResource extends ServerResourceBase implements Serv
         final String capabilities = String.join(",", info.getCapabilities());
 
         final StartupRoutingCommand cmd =
-                new StartupRoutingCommand(info.getCpus(), info.getCpuSpeed(), info.getTotalMemory(), info.getReservedMemory(), capabilities, _hypervisorType,
+                new StartupRoutingCommand(info.getCpus(), info.getCpuSpeed(), info.getTotalMemory(), capabilities, _hypervisorType,
                         RouterPrivateIpStrategy.HostLocal);
         cmd.setCpuSockets(info.getCpuSockets());
         fillNetworkInformation(cmd);

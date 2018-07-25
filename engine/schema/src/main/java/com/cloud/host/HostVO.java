@@ -368,9 +368,6 @@ public class HostVO implements Host {
     @Column(name = "mgmt_server_id")
     private Long managementServerId;
 
-    @Column(name = "dom0_memory")
-    private long dom0MinMemory;
-
     @Column(name = "version")
     private String version;
 
@@ -384,7 +381,6 @@ public class HostVO implements Host {
         this.guid = guid;
         this.status = Status.Creating;
         this.totalMemory = 0;
-        this.dom0MinMemory = 0;
         this.resourceState = ResourceState.Creating;
         this.uuid = UUID.randomUUID().toString();
     }
@@ -421,7 +417,6 @@ public class HostVO implements Host {
             null,
             null,
             null,
-            0,
             null);
         this.parent = parent;
         this.totalSize = totalSize;
@@ -432,7 +427,7 @@ public class HostVO implements Host {
     public HostVO(long id, String name, Type type, String privateIpAddress, String privateNetmask, String privateMacAddress, String publicIpAddress,
             String publicNetmask, String publicMacAddress, String storageIpAddress, String storageNetmask, String storageMacAddress, String guid, Status status,
             String version, String url, Date disconnectedOn, long dcId, Long podId, long serverId, long ping, Integer cpus, Long speed, Long totalMemory,
-            long dom0MinMemory, String caps) {
+            String caps) {
         this.id = id;
         this.name = name;
         this.status = status;
@@ -460,7 +455,6 @@ public class HostVO implements Host {
         this.lastPinged = ping;
         this.caps = caps;
         this.disconnectedOn = disconnectedOn;
-        this.dom0MinMemory = dom0MinMemory;
         this.storageUrl = url;
         this.uuid = UUID.randomUUID().toString();
     }

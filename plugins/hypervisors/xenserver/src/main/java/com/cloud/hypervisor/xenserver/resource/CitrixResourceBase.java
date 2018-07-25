@@ -1792,7 +1792,6 @@ public abstract class CitrixResourceBase implements ServerResource, HypervisorRe
 
             ram = (long)((ram - dom0Ram - _xsMemoryUsed) * _xsVirtualizationFactor);
             cmd.setMemory(ram);
-            cmd.setDom0MinMemory(dom0Ram);
 
             if (s_logger.isDebugEnabled()) {
                 s_logger.debug("Total Ram: " + ram + " dom0 Ram: " + dom0Ram);

@@ -71,7 +71,6 @@ public class DummyHostServerResource extends ServerResourceBase {
         cmd.setCpus(1);
         cmd.setSpeed(1000L);
         cmd.setMemory(1000000L);
-        cmd.setDom0MinMemory(256L);
         cmd.setCaps("hvm");
         cmd.setGuid(_guid);
         cmd.setDataCenter(_zone);
